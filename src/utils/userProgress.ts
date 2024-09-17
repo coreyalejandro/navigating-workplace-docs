@@ -1,7 +1,12 @@
 import { db } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-export const saveUserProgress = async (userId: string, progress: any) => {
+interface UserProgress {
+  completedChallenges: number;
+  totalChallenges: number;
+}
+
+export const saveUserProgress = async (userId: string, progress: UserProgress): Promise<void> => {
   try {
     await setDoc(doc(db, 'userProgress', userId), progress);
     console.log('Progress saved successfully');
@@ -10,12 +15,18 @@ export const saveUserProgress = async (userId: string, progress: any) => {
   }
 };
 
-export const getUserProgress = async (userId: string) => {
+export const getUserProgress = async (userId: string): Promise<UserProgress | null> => {
   try {
     const docRef = doc(db, 'userProgress', userId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data();
+      const data = docSnap.data();
+      if (isUserProgress(data)) {
+        return data;
+      } else {
+        console.log('Invalid progress data structure');
+        return null;
+      }
     } else {
       console.log('No progress found for user');
       return null;
@@ -25,3 +36,14 @@ export const getUserProgress = async (userId: string) => {
     return null;
   }
 };
+
+function isUserProgress(data: unknown): data is UserProgress {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'completedChallenges' in data &&
+    'totalChallenges' in data &&
+    typeof (data as UserProgress).completedChallenges === 'number' &&
+    typeof (data as UserProgress).totalChallenges === 'number'
+  );
+}
