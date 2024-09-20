@@ -1,36 +1,45 @@
 'use client';
 
-import { useAuth } from '@/components/AuthProvider';
-import LogoutButton from '@/components/LogoutButton';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
+import AccessibilitySettings from '@/components/AccessibilitySettings';
+import Login from '@/components/Login';
+import Signup from '@/components/Signup';
+import LogoutButton from '@/components/LogoutButton';
 
-export default function Profile() {
+export default function Home() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
-    return (
-      <div>
-        <p>Please log in to view this page.</p>
-        <Link href="/">Go to Home</Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-6 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold mb-4">User Profile</h1>
-        <p className="mb-2">Email: {user.email}</p>
-        <p className="mb-4">User ID: {user.uid}</p>
-        <LogoutButton />
-        <Link href="/" className="block mt-4 text-blue-500 hover:text-blue-700">
-          Go to Home
-        </Link>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="text-4xl font-bold mb-4">Workplace Document Navigator</h1>
+      <p className="mb-4">Practice navigating workplace documents with timed challenges.</p>
+      {user ? (
+        <div className="flex flex-col items-center">
+          <Link href="/challenge/1" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
+            Start Challenge
+          </Link>
+          <Link href="/profile" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
+            View Profile
+          </Link>
+          <LogoutButton />
+        </div>
+      ) : (
+        <div>
+          <p className="mb-4">Please sign in to start a challenge.</p>
+          <div className="flex space-x-4">
+            <Login />
+            <Signup />
+          </div>
+        </div>
+      )}
+      <div className="mt-8">
+        <AccessibilitySettings onSettingsChange={() => {}} />
       </div>
-    </div>
+    </main>
   );
 }
